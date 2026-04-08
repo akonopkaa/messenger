@@ -1,22 +1,28 @@
-import { useState, useEffect } from "react";
-import test from "./API/test.jsx"
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
+import axios from "axios"
+import Login from "./Login.jsx"
+import Register from "./Register.jsx"
 
-function App() {
-  const [response, setResponse] = useState(null);
+axios.defaults.withCredentials = true
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await test();
-      setResponse(result.message);
-    };
-    fetchData();
-  }, []);
-
+const App = () => {
   return (
-    <div>
-      <p>{response}</p>
-    </div>
-  );
-};
+    <BrowserRouter>
+      <nav>
+        <Link to="/login">
+          <button>Login</button>
+        </Link>
+        <Link to="/register">
+          <button>Register</button>
+        </Link>
+      </nav>
 
-export default App;
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
+export default App
