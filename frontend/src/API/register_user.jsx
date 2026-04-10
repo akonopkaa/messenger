@@ -8,11 +8,9 @@ const registerUser = async (username, email, password, confirmation) => {
             password: password,
             confirmation: confirmation
         })
-        console.log(response.data.message)
-        return response.data.message
+        return { success: true, message: response.data.message }
     } catch (error) {
-        console.error(error.response?.data.message)
-        return error.response?.data.message
+        return { success: false, message: error.response?.data.message }
     }
 }
 

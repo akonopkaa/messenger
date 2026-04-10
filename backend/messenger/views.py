@@ -1,15 +1,9 @@
 import json
-from .models import User
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
+from .models import User, Message
+from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.views.decorators.csrf import csrf_exempt
-
-# def test(request):
-#     if request.method != "GET":
-#         return JsonResponse({"message": "GET request required!"}, status = 400)
-#     return JsonResponse({"message": "Hello, world!"}, status = 200)
 
 @csrf_exempt
 def register_user(request):
@@ -54,3 +48,31 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return JsonResponse({"message": "Logout successful!"}, status = 200)
+
+@csrf_exempt
+def get_messages(request, username):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Unauthorized!"}, status = 401)
+    if request.method != "GET":
+        return JsonResponse({"message": "GET request required!"}, status = 400)
+    try:
+        offset = int(request.GET.get("offset", 0))
+        other_user = User.objects.get(username = username)
+        sent = list(Message.objects.filter(sender = request.user, receiver = other_user))
+        received = list(Message.objects.filter(sender = other_user, receiver = request.user))
+        all_messages = sorted(sent + received, key = lambda msg: msg.timestamp, reverse = True)
+        chunk = all_messages[offset : offset + 10]
+        chunk.reverse()
+        messages_list = []
+        for msg in chunk:
+            messages_list.append({
+                "id": msg.id, # type: ignore
+                "sender": msg.sender.username,
+                "receiver": msg.receiver.username,
+                "content": msg.content,
+            })
+        return JsonResponse(messages_list, safe = False, status = 200)
+    except User.DoesNotExist:
+        return JsonResponse({"message": "User not found!"}, status = 404)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status = 400)

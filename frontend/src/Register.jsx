@@ -1,13 +1,15 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import registerUser from "./API/register_user"
 
-const Register = () => {
+const Register = ({ setAuth }) => {
     const [username, setUsername] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmation, setConfirmation] = useState("")
     const [status, setStatus] = useState("typing")
     const [response, setResponse] = useState(null)
+    const navigate = useNavigate()
 
     const handleUsernameChange = (event) => {
         setUsername(event.target.value)
@@ -31,12 +33,17 @@ const Register = () => {
         setStatus("submitting")
         const result = await registerUser(username, email, password, confirmation)
         console.log(result)
-        setResponse(result)
-        setStatus("typing")
         setUsername("")
         setEmail("")
         setPassword("")
         setConfirmation("")
+        if (result.success) {
+            setAuth(true)
+            navigate("/")
+        } else {
+            setResponse(result.message)
+            setStatus("typing")
+        }
     }
 
     return (
@@ -45,14 +52,16 @@ const Register = () => {
                 Register
             </h2>
             <form
-                onSubmit={handleSubmit}>
+                onSubmit={handleSubmit}
+            >
                 <input
                     type="text"
                     name="username"
                     value={username}
                     placeholder="username"
                     onChange={handleUsernameChange}
-                    disabled={status === "submitting"}>
+                    disabled={status === "submitting"}
+                >
                 </input>
                 <input
                     type="email"
@@ -60,7 +69,8 @@ const Register = () => {
                     value={email}
                     placeholder="email"
                     onChange={handleEmailChange}
-                    disabled={status === "submitting"}>
+                    disabled={status === "submitting"}
+                >
                 </input>
                 <input
                     type="password"
@@ -68,7 +78,8 @@ const Register = () => {
                     value={password}
                     placeholder="password"
                     onChange={handlePasswordChange}
-                    disabled={status === "submitting"}>
+                    disabled={status === "submitting"}
+                >
                 </input>
                 <input
                     type="password"
@@ -76,15 +87,21 @@ const Register = () => {
                     value={confirmation}
                     placeholder="confirm password"
                     onChange={handleConfirmationChange}
-                    disabled={status === "submitting"}>
+                    disabled={status === "submitting"}
+                >
                 </input>
                 <input
                     type="submit"
                     value="Register"
-                    disabled={status === "submitting"}>
+                    disabled={status === "submitting"}
+                >
                 </input>
             </form>
-            {response && <p>{response}</p>}
+            {response &&
+                <p>
+                    {response}
+                </p>
+            }
         </div>
     )
 }

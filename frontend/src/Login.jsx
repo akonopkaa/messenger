@@ -1,11 +1,13 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import loginUser from "./API/login_user"
 
-const Login = () => {
+const Login = ({ setAuth }) => {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [status, setStatus] = useState("typing")
     const [response, setResponse] = useState(null)
+    const navigate = useNavigate()
 
     const handleUsernameChange = (event) => {
         setUsername(event.target.value)
@@ -21,10 +23,15 @@ const Login = () => {
         setStatus("submitting")
         const result = await loginUser(username, password)
         console.log(result)
-        setResponse(result)
-        setStatus("typing")
         setUsername("")
         setPassword("")
+        if (result.success) {
+            setAuth(true)
+            navigate("/")
+        } else {
+            setResponse(result.message)
+            setStatus("typing")
+        }
     }
 
     return (
@@ -33,14 +40,16 @@ const Login = () => {
                 Login
             </h2>
             <form
-                onSubmit={handleSubmit}>
+                onSubmit={handleSubmit}
+            >
                 <input
                     type="text"
                     name="username"
                     value={username}
                     placeholder="username"
                     onChange={handleUsernameChange}
-                    disabled={status === "submitting"}>
+                    disabled={status === "submitting"}
+                >
                 </input>
                 <input
                     type="password"
@@ -48,15 +57,21 @@ const Login = () => {
                     value={password}
                     placeholder="password"
                     onChange={handlePasswordChange}
-                    disabled={status === "submitting"}>
+                    disabled={status === "submitting"}
+                >
                 </input>
                 <input
                     type="submit"
                     value="Login"
-                    disabled={status === "submitting"}>
+                    disabled={status === "submitting"}
+                >
                 </input>
             </form>
-            {response && <p>{response}</p>}
+            {response &&
+                <p>
+                    {response}
+                </p>
+            }
         </div>
     )
 }
