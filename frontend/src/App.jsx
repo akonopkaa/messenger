@@ -53,7 +53,7 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={<Chat />}
+          element={isAuth ? <Chat /> : <h2>Login or register</h2>}
         />
         <Route
           path="/login"

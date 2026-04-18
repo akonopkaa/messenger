@@ -1,8 +1,11 @@
 import axios from "axios"
 
-const logoutUser = async () => {
+const sendMessage = async (receiver, content) => {
     try {
-        const response = await axios.post("http://localhost:8000/logout/", {}, {
+        const response = await axios.post("http://localhost:8000/send_message/", {
+            receiver: receiver,
+            content: content
+        }, {
             withCredentials: true
         })
         return { success: true, message: response.data.message }
@@ -11,4 +14,4 @@ const logoutUser = async () => {
     }
 }
 
-export default logoutUser
+export default sendMessage

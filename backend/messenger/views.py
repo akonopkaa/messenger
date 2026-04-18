@@ -76,3 +76,42 @@ def get_messages(request, username):
         return JsonResponse({"message": "User not found!"}, status = 404)
     except Exception as e:
         return JsonResponse({"message": str(e)}, status = 400)
+    
+@csrf_exempt
+def get_users(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Unauthorized!"}, status = 401)
+    if request.method != "GET":
+        return JsonResponse({"message": "GET request required!"}, status = 400)
+    try:
+        users = list(User.objects.exclude(id=request.user.id))
+        all_users = []
+        for user in users:
+            all_users.append({
+                "id": user.id, #type: ignore
+                "username": user.username
+            })
+        return JsonResponse(all_users, safe = False, status = 200)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status = 400)
+    
+@csrf_exempt
+def send_message(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Unauthorized!"}, status = 401)
+    if request.method != "POST":
+        return JsonResponse({"message": "POST request required!"}, status = 400)
+    try:
+        data = json.loads(request.body)
+        receiver_username = data.get("receiver")
+        content = data.get("content")
+        
+        if not receiver_username or not content:
+            return JsonResponse({"message": "Receiver and content are required!"}, status = 400)
+        receiver = User.objects.get(username = receiver_username)
+        Message.objects.create(sender = request.user, receiver = receiver, content = content)
+        return JsonResponse({"message": "Message sent successfully!"}, status = 201)
+    except User.DoesNotExist:
+        return JsonResponse({"message": "Receiver not found!"}, status = 404)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status = 400)
