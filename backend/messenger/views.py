@@ -70,6 +70,7 @@ def get_messages(request, username):
                 "sender": msg.sender.username,
                 "receiver": msg.receiver.username,
                 "content": msg.content,
+                "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M")
             })
         return JsonResponse(messages_list, safe = False, status = 200)
     except User.DoesNotExist:

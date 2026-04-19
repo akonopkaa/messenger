@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Container, Row, Col, Form, Button } from "react-bootstrap"
 import getUsers from "./API/get_users"
 import getMessages from "./API/get_messages"
 import sendMessage from "./API/send_message"
@@ -9,6 +10,8 @@ const Chat = () => {
     const [messages, setMessages] = useState([])
     const [newMessage, setNewMessage] = useState("")
     const [error, setError] = useState("")
+    const [offset, setOffset] = useState(0)
+    const [hasMore, setHasMore] = useState(false)
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -24,17 +27,49 @@ const Chat = () => {
 
     useEffect(() => {
         if (selectedUser) {
+            setOffset(0)
             const fetchMessages = async () => {
-                const response = await getMessages(selectedUser.username)
+                const response = await getMessages(selectedUser.username, 0)
                 if (response.success) {
                     setMessages(response.data)
+                    setHasMore(response.data.length === 10)
+                    setError("")
                 } else {
+                    setMessages([])
+                    setHasMore(false)
                     setError(response.message)
                 }
             }
             fetchMessages()
         }
     }, [selectedUser])
+
+    useEffect(() => {
+        if (!selectedUser) return;
+        const interval = setInterval(async () => {
+            if (offset === 0) {
+                const response = await getMessages(selectedUser.username, 0)
+                if (response.success) {
+                    setMessages(response.data)
+                }
+            }
+        }, 5000)
+
+        return () => clearInterval(interval)
+    }, [selectedUser, offset])
+
+    const handleLoadMore = async () => {
+        if (!selectedUser) return
+        const newOffset = offset + 10
+        const response = await getMessages(selectedUser.username, newOffset)
+        if (response.success) {
+            setMessages(response.data.concat(messages))
+            setOffset(newOffset)
+            setHasMore(response.data.length === 10)
+        } else {
+            setError(response.message)
+        }
+    }
 
     const handleUserChange = (user) => {
         setSelectedUser(user)
@@ -51,6 +86,8 @@ const Chat = () => {
             const msgResponse = await getMessages(selectedUser.username)
             if (msgResponse.success) {
                 setMessages(msgResponse.data)
+                setOffset(0)
+                setHasMore(msgResponse.data.length === 10)
             } else {
                 setError(msgResponse.message)
             }
@@ -59,75 +96,100 @@ const Chat = () => {
         }
     }
 
-    const containerStyle = { display: "flex", height: "calc(100vh - 60px)" }
-    const leftPaneStyle = { width: "30%", padding: "10px" }
-    const rightPaneStyle = { width: "70%", padding: "10px", display: "flex", flexDirection: "column" }
-
     return (
-        <div
-            style={containerStyle}
+        <Container
+            className="my-3 border rounded p-0"
+            style={{ height: "calc(100vh - 100px)", backgroundColor: "white" }}
         >
-            <div
-                style={leftPaneStyle}
+            <Row
+                className="m-0 h-100"
             >
-                <h2>
-                    Users
-                </h2>
-                {error &&
-                    <p
-                        style={{ color: "red" }}>
-                        {error}
-                    </p>
-                }
-                <ul>
-                    {users.map((user) => (
-                        <li
-                            key={user.id}
-                            onClick={() => handleUserChange(user)}
-                            style={{
-                                cursor: "pointer",
-                                marginBottom: "10px",
-                                fontWeight: selectedUser?.username === user.username ? "bold" : "normal"
-                            }}
-                        >
-                            {user.username}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            <div
-                style={rightPaneStyle}
-            >
-                <div
-                    style={{ flexGrow: 1, overflowY: "auto" }}
+                <Col
+                    sm={4}
+                    md={3}
+                    className="border-end p-3 h-100 overflow-auto"
                 >
-                    {messages.map((msg) => (
-                        <div
-                            key={msg.id}
+                    <h4>
+                        Users
+                    </h4>
+                    {error && <p className="text-danger">{error}</p>}
+                    <div>
+                        {users.map((user) => (
+                            <div
+                                key={user.id}
+                                onClick={() => handleUserChange(user)}
+                                className={`p-2 mb-2 border rounded ${selectedUser?.username === user.username ? 'bg-primary text-white' : 'bg-light text-dark'}`}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {user.username}
+                            </div>
+                        ))}
+                    </div>
+                </Col>
+                <Col
+                    sm={8}
+                    md={9}
+                    className="p-3 d-flex flex-column h-100"
+                >
+                    <div
+                        className="flex-grow-1 overflow-auto mb-3"
+                    >
+                        {hasMore && (
+                            <div
+                                className="text-center my-2">
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={handleLoadMore}
+                                >
+                                    Load more
+                                </Button>
+                            </div>
+                        )}
+                        {messages.map((msg) => {
+                            const isMine = msg.sender !== selectedUser.username
+                            return (
+                                <div
+                                    key={msg.id}
+                                    className={`d-flex mb-2 ${isMine ? "justify-content-end" : "justify-content-start"}`}
+                                >
+                                    <div
+                                        className={`p-2 border rounded ${isMine ? "bg-primary text-white" : "bg-white text-dark"}`}
+                                        style={{ maxWidth: "75%" }}
+                                    >
+                                        <span>
+                                            {msg.content}
+                                        </span>
+                                        <div
+                                            style={{ fontSize: "0.8rem", opacity: 0.8, marginBottom: "2px" }}
+                                        >
+                                            {msg.sender} at {msg.timestamp}
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                    <div
+                        className="d-flex mt-auto"
+                    >
+                        <Form.Control
+                            type="text"
+                            value={newMessage}
+                            onChange={handleMessageChange}
+                            placeholder="Type a message..."
+                            className="me-2"
+                        />
+                        <Button
+                            onClick={handleSendMessage}
+                            disabled={!selectedUser || !newMessage.trim()}
                         >
-                            <strong>
-                                {msg.sender}:
-                            </strong>
-                            <span>
-                                {msg.content}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-                <div>
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={handleMessageChange}
-                        placeholder="Type a message..."
-                    />
-                    <button
-                        onClick={handleSendMessage}>
-                        Send
-                    </button>
-                </div>
-            </div>
-        </div>
+                            Send
+                        </Button>
+                    </div>
+                </Col>
+            </Row>
+        </Container>
     )
 }
 
