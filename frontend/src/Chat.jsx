@@ -170,7 +170,7 @@ const Chat = () => {
                             )
                         })}
                     </div>
-                    <div
+                    {/* <div
                         className="d-flex mt-auto"
                     >
                         <Form.Control
@@ -186,7 +186,7 @@ const Chat = () => {
                         >
                             Send
                         </Button>
-                    </div>
+                    </div> */}
                 </Col>
             </Row>
         </Container>
