@@ -23,6 +23,8 @@ const Chat = () => {
             }
         }
         fetchUsers()
+        const interval = setInterval(fetchUsers, 10000)
+        return () => clearInterval(interval)
     }, [])
 
     useEffect(() => {
@@ -45,25 +47,28 @@ const Chat = () => {
     }, [selectedUser])
 
     useEffect(() => {
-        if (!selectedUser) return;
+        if (!selectedUser) return
         const interval = setInterval(async () => {
-            if (offset === 0) {
-                const response = await getMessages(selectedUser.username, 0)
-                if (response.success) {
-                    setMessages(response.data)
+            const response = await getMessages(selectedUser.username, 0)
+            if (response.success) {
+                const currentIds = messages.map((msg) => msg.id)
+                const newMsgs = response.data.filter((msg) => !currentIds.includes(msg.id))
+                if (newMsgs.length > 0) {
+                    setMessages(messages.concat(newMsgs))
                 }
             }
         }, 5000)
-
         return () => clearInterval(interval)
-    }, [selectedUser, offset])
+    }, [selectedUser, messages])
 
     const handleLoadMore = async () => {
         if (!selectedUser) return
         const newOffset = offset + 10
         const response = await getMessages(selectedUser.username, newOffset)
         if (response.success) {
-            setMessages(response.data.concat(messages))
+            const currentIds = messages.map((msg) => msg.id)
+            const olderMsgs = response.data.filter((msg) => !currentIds.includes(msg.id))
+            setMessages(olderMsgs.concat(messages))
             setOffset(newOffset)
             setHasMore(response.data.length === 10)
         } else {
@@ -170,7 +175,7 @@ const Chat = () => {
                             )
                         })}
                     </div>
-                    {/* <div
+                    <div
                         className="d-flex mt-auto"
                     >
                         <Form.Control
@@ -186,7 +191,7 @@ const Chat = () => {
                         >
                             Send
                         </Button>
-                    </div> */}
+                    </div>
                 </Col>
             </Row>
         </Container>

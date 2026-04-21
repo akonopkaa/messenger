@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Container, Form, Button } from "react-bootstrap"
 import registerUser from "./API/register_user"
 
 const Register = ({ setAuth }) => {
@@ -47,62 +48,67 @@ const Register = ({ setAuth }) => {
     }
 
     return (
-        <div>
-            <h2>
-                Register
-            </h2>
-            <form
-                onSubmit={handleSubmit}
-            >
-                <input
-                    type="text"
-                    name="username"
-                    value={username}
-                    placeholder="username"
-                    onChange={handleUsernameChange}
-                    disabled={status === "submitting"}
-                >
-                </input>
-                <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    placeholder="email"
-                    onChange={handleEmailChange}
-                    disabled={status === "submitting"}
-                >
-                </input>
-                <input
-                    type="password"
-                    name="password"
-                    value={password}
-                    placeholder="password"
-                    onChange={handlePasswordChange}
-                    disabled={status === "submitting"}
-                >
-                </input>
-                <input
-                    type="password"
-                    name="confirmation"
-                    value={confirmation}
-                    placeholder="confirm password"
-                    onChange={handleConfirmationChange}
-                    disabled={status === "submitting"}
-                >
-                </input>
-                <input
+        <Container
+            className="my-5 p-4 border rounded bg-white"
+            style={{ maxWidth: "400px" }}
+        >
+            <h2 className="text-center mb-4">Register</h2>
+            <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="text"
+                        name="username"
+                        value={username}
+                        placeholder="Username"
+                        onChange={handleUsernameChange}
+                        disabled={status === "submitting"}
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="email"
+                        name="email"
+                        value={email}
+                        placeholder="Email"
+                        onChange={handleEmailChange}
+                        disabled={status === "submitting"}
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="password"
+                        name="password"
+                        value={password}
+                        placeholder="Password"
+                        onChange={handlePasswordChange}
+                        disabled={status === "submitting"}
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="password"
+                        name="confirmation"
+                        value={confirmation}
+                        placeholder="Confirm password"
+                        onChange={handleConfirmationChange}
+                        disabled={status === "submitting"}
+                    />
+                </Form.Group>
+                <Button
+                    variant="primary"
                     type="submit"
-                    value="Register"
+                    className="w-100"
                     disabled={status === "submitting"}
                 >
-                </input>
-            </form>
-            {response &&
-                <p>
+                    Register
+                </Button>
+            </Form>
+            {response && (
+                <p className="text-danger text-center mt-3 mb-0">
                     {response}
                 </p>
-            }
-        </div>
+            )}
+        </Container>
     )
 }
 

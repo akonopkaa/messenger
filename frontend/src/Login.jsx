@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Container, Form, Button } from "react-bootstrap"
 import loginUser from "./API/login_user"
 
 const Login = ({ setAuth }) => {
@@ -35,44 +36,47 @@ const Login = ({ setAuth }) => {
     }
 
     return (
-        <div>
-            <h2>
-                Login
-            </h2>
-            <form
-                onSubmit={handleSubmit}
-            >
-                <input
-                    type="text"
-                    name="username"
-                    value={username}
-                    placeholder="username"
-                    onChange={handleUsernameChange}
-                    disabled={status === "submitting"}
-                >
-                </input>
-                <input
-                    type="password"
-                    name="password"
-                    value={password}
-                    placeholder="password"
-                    onChange={handlePasswordChange}
-                    disabled={status === "submitting"}
-                >
-                </input>
-                <input
+        <Container
+            className="my-5 p-4 border rounded bg-white"
+            style={{ maxWidth: "400px" }}
+        >
+            <h2 className="text-center mb-4">Login</h2>
+            <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="text"
+                        name="username"
+                        value={username}
+                        placeholder="Username"
+                        onChange={handleUsernameChange}
+                        disabled={status === "submitting"}
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="password"
+                        name="password"
+                        value={password}
+                        placeholder="Password"
+                        onChange={handlePasswordChange}
+                        disabled={status === "submitting"}
+                    />
+                </Form.Group>
+                <Button
+                    variant="primary"
                     type="submit"
-                    value="Login"
+                    className="w-100"
                     disabled={status === "submitting"}
                 >
-                </input>
-            </form>
-            {response &&
-                <p>
+                    Login
+                </Button>
+            </Form>
+            {response && (
+                <p className="text-danger text-center mt-3 mb-0">
                     {response}
                 </p>
-            }
-        </div>
+            )}
+        </Container>
     )
 }
 

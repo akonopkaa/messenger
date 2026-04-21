@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 import { useState } from "react"
 import axios from "axios"
+import { Navbar, Nav, Button } from "react-bootstrap"
 import Login from "./Login.jsx"
 import Register from "./Register.jsx"
 import Logout from "./Logout.jsx"
@@ -18,54 +19,46 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <nav>
-        {isAuth ? (
-          <>
-            <Link
-              to="/"
-            >
-              <button
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
-            </Link>
-          </>
-        ) : (
-          <>
-            <Link
-              to="/login"
-            >
-              <button>
+      <Navbar bg="white" className="border-bottom px-4">
+        <Navbar.Brand as={Link} to="/" className="fw-bold text-primary">
+          Messenger
+        </Navbar.Brand>
+        <Nav className="ms-auto">
+          {isAuth ? (
+            <Button variant="outline-danger" onClick={handleLogout}>
+              Logout
+            </Button>
+          ) : (
+            <>
+              <Button as={Link} to="/login" variant="outline-primary" className="me-2">
                 Login
-              </button>
-            </Link>
-            <Link
-              to="/register"
-            >
-              <button>
+              </Button>
+              <Button as={Link} to="/register" variant="primary">
                 Register
-              </button>
-            </Link>
-          </>
-        )}
-      </nav>
+              </Button>
+            </>
+          )}
+        </Nav>
+      </Navbar>
+
       <Routes>
         <Route
           path="/"
-          element={isAuth ? <Chat /> : <h2>Login or register</h2>}
+          element={
+            isAuth ? (
+              <Chat />
+            ) : (
+              <h2 className="text-center mt-5 text-muted">Login or register to chat</h2>
+            )
+          }
         />
         <Route
           path="/login"
-          element={<Login
-            setAuth={setIsAuth}
-          />}
+          element={<Login setAuth={setIsAuth} />}
         />
         <Route
           path="/register"
-          element={<Register
-            setAuth={setIsAuth}
-          />}
+          element={<Register setAuth={setIsAuth} />}
         />
       </Routes>
     </BrowserRouter>
