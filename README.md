@@ -10,7 +10,6 @@ This project is a private, 1-on-1 real-time messaging web application. It uses a
 
 ### Frontend: ###
 - Node.js
-- npm
 - React (Vite)
 - react-bootstrap
 - axios
